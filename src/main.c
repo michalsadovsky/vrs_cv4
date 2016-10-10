@@ -49,7 +49,7 @@ SOFTWARE.
 int main(void)
 {
   int i = 0;
-  int AD_value;
+  uint16_t AD_value=1000;
 
   /**
   *  IMPORTANT NOTE!
@@ -73,13 +73,26 @@ int main(void)
   /* Start ADC Software Conversion */
 
 
+    adc_init();
+    gpio_init();
+
+
+ 	   GPIO_SetBits(GPIOA, GPIO_Pin_5);
 
   /* Infinite loop */
-  while (1)
-  {     adc_init();
-        ADC_SoftwareStartConv(ADC1);
-        while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC)){}
-	    AD_value=ADC_GetConversionValue(ADC1);
+  while (1){
+
+	       AD_value=adc_getMeasurement();
+		   GPIO_SetBits(GPIOA, GPIO_Pin_5);
+		   for(int ii=0;ii<(AD_value*1000);ii++){             // pauza na blikanie
+
+		 		 	 	  }
+		  GPIO_ResetBits(GPIOA, GPIO_Pin_5);
+		  for(int ii=0;ii<(AD_value*1000);ii++){             // pauza na blikanie
+
+		 	 	  }
+
+
 
   }
   return 0;
@@ -160,4 +173,22 @@ void adc_init(void)
   }
   /* Start ADC Software Conversion */
   ADC_SoftwareStartConv(ADC1);
+}
+
+
+int adc_getMeasurement(void)
+{       int value;
+	       ADC_SoftwareStartConv(ADC1);
+    while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC)){}
+    value =ADC_GetConversionValue(ADC1);
+return value;
+}
+void gpio_init(void){
+
+	  GPIO_InitTypeDef gpioInitStruc;    //struktura pre GPIOA
+	gpioInitStruc.GPIO_Mode = GPIO_Mode_OUT;
+	gpioInitStruc.GPIO_OType =GPIO_OType_PP;
+	gpioInitStruc.GPIO_Pin = GPIO_Pin_5;
+	gpioInitStruc.GPIO_Speed = GPIO_Speed_40MHz;
+	GPIO_Init(GPIOA, &gpioInitStruc);
 }
